@@ -197,9 +197,6 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
     OpenApp(title, "Assets\Generated Files\\" + title + ".docx")
 
 
-words = ["prepare a word", "make a raport"]
-
-
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
     if "open".lower() in QUERY.lower():
         print(QUERY.lower().split("open ", 1)[1])
