@@ -36,7 +36,7 @@ def Read(text):
 def Listen():
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Waiting For Activating...")
+        print("Listening...")
         # adjust for ambient noise, if any
         r.adjust_for_ambient_noise(source)
         # listen for audio and store it in an AudioData object
