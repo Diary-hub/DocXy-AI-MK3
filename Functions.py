@@ -2,7 +2,9 @@ import os
 import subprocess
 import openai
 import pyttsx3
+import json
 import random
+import requests
 import mysql.connector
 import tkinter as tk
 from tkinter import filedialog
@@ -232,3 +234,28 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
                 + QUERY
             )
         )
+
+
+def Carter_AI(query):
+    response = requests.post(
+        "https://api.carterlabs.ai/chat",
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(
+            {
+                "text": query,
+                "key": API_KEY_CARTER_AI,
+                "playerId": "jarvis",  # THIS CAN BE ANYTHING YOU WANT!
+                "speak": True,  # DEFAULT FALSE | FOR VOICE OUTPUT
+            }
+        ),
+    )
+    import playsound as ps
+    import urllib.request
+    from pydub import AudioSegment
+    from pydub.playback import play
+
+    urllib.request.urlretrieve(
+        response.json()["output"]["audio"], "Assets\Audio Files\Output\Response.mp3"
+    )
+
+    ps.playsound("Assets\Audio Files\Output\Response.mp3")
