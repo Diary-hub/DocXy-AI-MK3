@@ -40,6 +40,18 @@ def Listen():
         # listen for audio and store it in an AudioData object
         audio = r.listen(source, 0, 8)
 
+    try:
+        mySpeech = r.recognize_google(audio)
+        print("You said: " + mySpeech)
+        return mySpeech
+    except sr.UnknownValueError:
+        print("Sorry Sir, I Could Not Understand")
+        return ""
+
+    except sr.RequestError:
+        print("Sorry, my speech recognition service is down")
+        return ""
+
 
 openai.api_key = API_KEY_CHATGPT_AI  # Replace with your API key
 
@@ -210,4 +222,16 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
             random.choice(
                 [
                     "Sir, Jarvis is Out of Service",
-                    "I'
+                    "I'm Shutting Down",
+                    "It Seems I'm No Longer Required",
+                ]
+            )
+        )
+        exit()
+    else:
+        Read(
+            ask_gpt(
+                "Your Jarivs from iron man, when i tell you anything, respond fast and short, just like jarivs: "
+                + QUERY
+            )
+        )
