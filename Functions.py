@@ -14,6 +14,11 @@ from API_Secrets import *
 import webbrowser
 from docxtpl import DocxTemplate
 import speech_recognition as sr
+import playsound as ps
+import urllib.request
+from pydub import AudioSegment
+import time
+import threading
 
 
 def Read(text):
@@ -70,7 +75,7 @@ def ask_gpt(prompt):
         stop=None,
     )
 
-    print("ChatGPT: ", response.choices[0].text)
+    # print("ChatGPT: ", response.choices[0].text)
     return response.choices[0].text
 
 
@@ -169,16 +174,7 @@ def Play(name):
     pywhatkit.playonyt(name)
 
 
-def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
-    Read(
-        talk_gpt(
-            "pretend like like your jarivs, answer me this prompt like you already did write or created it"
-            + ", only an answer for the sake of conversation of 10-20 words and dont use suggesting:"
-            + "jarvis i have an assigmnet about "
-            + title
-        )
-    )
-    Read("Sir I'am Working on Preparing a Document about " + title)
+def CreateWord(title, members):
     file = DocxTemplate("Assets\DOCX Template\AssigmentTemplate.docx")
     context = {
         "title": title,
@@ -197,8 +193,28 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
     }
     file.render(context)
     file.save("Assets\Generated Files\\" + title + ".docx")
+
     Read("Sir, The Document is Ready I Will Open it!")
     OpenApp(title, "Assets\Generated Files\\" + title + ".docx")
+
+
+def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
+    responce = talk_gpt(
+        "pretend like like your jarivs, answer me this prompt like you already did write or created it"
+        + ", only an answer for the sake of conversation of 10-20 words and dont use suggesting:"
+        + "jarvis i have an assigmnet about "
+        + title
+    )
+    t = threading.Thread(target=Read, args=[responce])
+    t.start()
+
+    t = threading.Thread(target=CreateWord, args=[title, members])
+    t.start()
+    t2 = threading.Thread(
+        target=Read, args=["Sir I'am Working on Preparing a Document about " + title]
+    )
+    t2.start()
+    return "Sir I'am Working on Preparing a Document about " + title
 
 
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
@@ -231,12 +247,13 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         )
         exit()
     else:
-        return Read(
-            ask_gpt(
-                "Your Jarivs from iron man, when i tell you anything, respond fast and short, just like jarivs: "
-                + QUERY
-            )
+        responce = ask_gpt(
+            "Your Jarivs from iron man, when i tell you anything, respond fast, just like jarivs: "
+            + QUERY
         )
+        t = threading.Thread(target=Read, args=[responce])
+        t.start()
+        return responce
 
 
 def Carter_AI(query):
@@ -247,18 +264,19 @@ def Carter_AI(query):
             {
                 "text": query,
                 "key": API_KEY_CARTER_AI,
-                "playerId": "jarvis",  # THIS CAN BE ANYTHING YOU WANT!
+                "playerId": "jarvis",
+                "personal": True,  # THIS CAN BE ANYTHING YOU WANT!
                 "speak": True,  # DEFAULT FALSE | FOR VOICE OUTPUT
             }
         ),
     )
-    import playsound as ps
-    import urllib.request
-    from pydub import AudioSegment
-    from pydub.playback import play
+    t = threading.Thread(target=PlaySound, args=[response.json()["output"]["audio"]])
+    t.start()
+    return response.json()["output"]["text"]
 
-    urllib.request.urlretrieve(
-        response.json()["output"]["audio"], "Assets\Audio Files\Output\Response.mp3"
-    )
+
+def PlaySound(URL):
+    urllib.request.urlretrieve(URL, "Assets\Audio Files\Output\Response.mp3")
 
     ps.playsound("Assets\Audio Files\Output\Response.mp3")
+    os.remove("Assets\Audio Files\Output\Response.mp3")
