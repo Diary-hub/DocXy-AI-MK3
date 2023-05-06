@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Jarvis Website</title>
+        <link rel="stylesheet" href="{{ url_for('static',
+            filename='style.css')}}">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="circle">
+                <h1 id="start-btn">Jarvis</h1>
+
+            </div>
+
+        </div>
+
+        <div class="boxes" id="boxes">
+            <div class="warning-box">
+                <h2>Warning</h2>
+                <p>This is a warning message.</p>
+            </div>
+
+            <div class="info-box">
+                <h2>Information</h2>
+                <p>This is an information message.</p>
+            </div>
+
+        </div>
+
+
+    </body>
+
+
+    <script
+        src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="{{ url_for('static',
+        filename='speechRecognition.js')}}">
+</script>
+
+    <script src="{{ url_for('static',
+        filename='app.js')}}">
+</script>
+
+
+
+</html>

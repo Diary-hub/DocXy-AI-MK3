@@ -31,6 +31,7 @@ def Read(text):
     # Convert text to speech
     engine.say(text)
     engine.runAndWait()
+    return text
 
 
 def Listen():
@@ -213,9 +214,10 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         Play(QUERY.lower().split("play ", 1)[1])
     elif "bring it".lower() in QUERY.lower():
         Play("Mother Mother - Hayloft")
+        return Read("Sir, There You Go.")
     elif "i have an assignment".lower() in QUERY.lower():
         TITLE = QUERY.lower().split("about ", 1)[1]
-        PrepareWord(TITLE, MEMBERS)
+        return PrepareWord(TITLE, MEMBERS)
     elif "bye".lower() in QUERY.lower():
         Read(
             random.choice(
@@ -228,7 +230,7 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         )
         exit()
     else:
-        Read(
+        return Read(
             ask_gpt(
                 "Your Jarivs from iron man, when i tell you anything, respond fast and short, just like jarivs: "
                 + QUERY

@@ -12,7 +12,7 @@ while True:
         # adjust for ambient noise, if any
         r.adjust_for_ambient_noise(source)
         # listen for audio and store it in an AudioData object
-        audio = r.listen(source, 0, 8)
+        audio = r.listen(source, 0, 5)
 
     # recognize speech using Google Speech Recognition
     try:
@@ -27,7 +27,7 @@ while True:
                     r.adjust_for_ambient_noise(source)
 
                     # listen for audio and store it in an AudioData object
-                    audio = r.listen(source, 0, 8)
+                    audio = r.listen(source, 0, 5)
                 try:
                     mySpeech = r.recognize_google(audio)
                     print("You said: " + mySpeech)
