@@ -31,6 +31,7 @@ def Read(text):
     # Convert text to speech
     engine.say(text)
     engine.runAndWait()
+    engine.startLoop(False)
     return text
 
 

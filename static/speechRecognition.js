@@ -15,9 +15,11 @@ recognition.onstart = function () {
 
 recognition.onspeechend = function () {
     text.text("No Activity")
+    content = ''
 }
 recognition.onerror = function () {
     text.text("Error Try Again")
+    content = ''
 }
 
 recognition.onresult = function (event) {
@@ -26,6 +28,7 @@ recognition.onresult = function (event) {
     var transcript = event.results[current][0].transcript
     content = transcript
     getResponce(content)
+    content = ''
 }
 
 $(document).ready(function () {
@@ -47,7 +50,6 @@ function getResponce(query) {
     fetch('http://127.0.0.1:5000/getResponse', {
         method: 'POST',
         body: JSON.stringify({ message: query }),
-        mode: 'cors',
         headers: {
             'Content-Type': 'application/json'
         },
