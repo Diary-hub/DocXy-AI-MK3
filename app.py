@@ -17,6 +17,7 @@ def getResponse():
     text = request.get_json()
     # response = ask_gpt(text["message"])
     response = CheckForCommand(text["message"])
+    # response = Exam()
     # response = Carter_AI(text["message"])
     reply = {"answer": response}
     return jsonify(reply)

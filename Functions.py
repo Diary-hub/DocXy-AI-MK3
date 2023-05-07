@@ -19,6 +19,7 @@ import urllib.request
 from pydub import AudioSegment
 import time
 import threading
+import datetime
 
 
 def Read(text):
@@ -217,48 +218,6 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
     return "Sir I'am Working on Preparing a Document about " + title
 
 
-def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
-    if "open".lower() in QUERY.lower():
-        print(QUERY.lower().split("open ", 1)[1])
-        SearchForPath(QUERY.lower().split("open ", 1)[1])
-    elif "lunch".lower() in QUERY.lower():
-        print(QUERY.lower().split("lunch ", 1)[1])
-        SearchForPath(QUERY.lower().split("open ", 1)[1])
-    elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
-        responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
-        t = threading.Thread(target=Read, args=[responce])
-        t.start()
-        return responce
-    elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
-        Play(QUERY.lower().split("play ", 1)[1])
-        return Read("Playing " + QUERY.lower().split("play ", 1)[1])
-    elif "bring it".lower() in QUERY.lower():
-        Play("Mother Mother - Hayloft")
-        return Read("Sir, There You Go.")
-    elif "i have an assignment".lower() in QUERY.lower():
-        TITLE = QUERY.lower().split("about ", 1)[1]
-        return PrepareWord(TITLE, MEMBERS)
-    elif "bye".lower() in QUERY.lower():
-        Read(
-            random.choice(
-                [
-                    "Sir, Jarvis is Out of Service",
-                    "I'm Shutting Down",
-                    "It Seems I'm No Longer Required",
-                ]
-            )
-        )
-        exit()
-    else:
-        responce = ask_gpt(
-            "Your Jarivs from iron man, when i tell you anything, respond fast, just like jarivs: "
-            + QUERY
-        )
-        t = threading.Thread(target=Read, args=[responce])
-        t.start()
-        return responce
-
-
 def Carter_AI(query):
     response = requests.post(
         "https://api.carterlabs.ai/chat",
@@ -283,3 +242,122 @@ def PlaySound(URL):
 
     ps.playsound("Assets\Audio Files\Output\Response.mp3")
     os.remove("Assets\Audio Files\Output\Response.mp3")
+
+
+def Exam():
+    from google.oauth2.service_account import Credentials
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
+
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+    creds = Credentials.from_service_account_file(
+        "Assets\Jarivs_Keys.json",
+        scopes=SCOPES,
+    )
+
+    try:
+        service = build("sheets", "v4", credentials=creds)
+
+        # Call the Sheets API
+        sheet = service.spreadsheets()
+        result = (
+            sheet.values()
+            .get(
+                spreadsheetId="1IBo4HxiCSglzgIdm4ALyG3wABay9SwOq8Igt_A_Lpv4",
+                range="Sheet1!A1:C7",
+            )
+            .execute()
+        )
+        values = result.get("values", [])
+
+        if not values:
+            print("No data found.")
+            return
+
+        isNextExam = True
+        i = 2
+        while isNextExam:
+            try:
+                if values[i][1]:
+                    subject = values[i][1].split("(", 1)[0]
+                    date = values[i][0].split(" ", 1)[1]
+                    dateDay = date.split("/", 2)[0]
+                    dateDay = dateDay.replace(" ", "")
+                    day = values[i][0].split(" ", 1)[0]
+
+                    today = str(datetime.date.today()).split("-", 2)[2]
+                    todayDateDay = ""
+
+                    for char in range(0, len(today)):
+                        if char == 0 and today[char] == "0":
+                            continue
+                        todayDateDay += today[char]
+
+                    date = date.replace(" ", "")
+                    date = date.replace("/", " ")
+                    if int(dateDay) > int(todayDateDay):
+                        responce = (
+                            "The Next Exam is: " + subject + "On " + day + " " + date
+                        )
+                        t = threading.Thread(target=Read, args=[responce])
+                        t.start()
+
+                        return responce
+                    else:
+                        i += 1
+                else:
+                    isNextExam = False
+                    responce = "Sir, You Don't Have Any Exam Scheduled"
+                    return responce
+            except IndexError:
+                isNextExam = False
+                responce = "Sir, You Don't Have Any Exam Scheduled"
+                return responce
+
+    except HttpError as err:
+        print(err)
+
+
+def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
+    if "open".lower() in QUERY.lower():
+        print(QUERY.lower().split("open ", 1)[1])
+        SearchForPath(QUERY.lower().split("open ", 1)[1])
+    elif "lunch".lower() in QUERY.lower():
+        print(QUERY.lower().split("lunch ", 1)[1])
+        SearchForPath(QUERY.lower().split("open ", 1)[1])
+    elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
+        responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
+        t = threading.Thread(target=Read, args=[responce])
+        t.start()
+        return responce
+    elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
+        Play(QUERY.lower().split("play ", 1)[1])
+        return Read("Playing " + QUERY.lower().split("play ", 1)[1])
+    elif "bring it".lower() in QUERY.lower():
+        Play("Mother Mother - Hayloft")
+        return Read("Sir, There You Go.")
+    elif "i have an assignment".lower() in QUERY.lower():
+        TITLE = QUERY.lower().split("about ", 1)[1]
+        return PrepareWord(TITLE, MEMBERS)
+    elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
+        return Exam()
+    elif "bye".lower() in QUERY.lower():
+        Read(
+            random.choice(
+                [
+                    "Sir, Jarvis is Out of Service",
+                    "I'm Shutting Down",
+                    "It Seems I'm No Longer Required",
+                ]
+            )
+        )
+        exit()
+    else:
+        responce = ask_gpt(
+            "Your Jarivs from iron man, when i tell you anything, respond fast, just like jarivs: "
+            + QUERY
+        )
+        t = threading.Thread(target=Read, args=[responce])
+        t.start()
+        return responce
