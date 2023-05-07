@@ -2,8 +2,7 @@ var speechRecognition = window.webkitSpeechRecognition
 
 var recognition = new speechRecognition()
 
-var text = $("#start-btn")
-var textarea = $("#text")
+var text = $("#text")
 var content = ''
 var boxes = $(".warning-container")
 
@@ -17,13 +16,19 @@ recognition.onstart = function () {
 recognition.onspeechend = function () {
     text.text("No Activity")
     content = ''
-    location.reload()
+    recognition.continuous = false
+    recognition.stop()
 
+}
+recognition.onend = function () {
+    console.log('Starting Again')
+
+    recognition.start()
 }
 recognition.onerror = function () {
     text.text("Error Try Again")
     content = ''
-    location.reload()
+    console.log('Error');
 
 }
 
@@ -38,14 +43,15 @@ recognition.onresult = function (event) {
     content = ''
 }
 
+if (content.length) {
+    content += ''
+}
+recognition.start()
+
 $(document).ready(function () {
-    if (content.length) {
-        content += ''
-    }
 
     boxes = document.querySelector(".warning-container")
 
-    recognition.start()
 })
 
 this.messages = [];

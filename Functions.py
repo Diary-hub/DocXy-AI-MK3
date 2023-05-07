@@ -225,10 +225,13 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         print(QUERY.lower().split("lunch ", 1)[1])
         SearchForPath(QUERY.lower().split("open ", 1)[1])
     elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
-        Read(ask_gpt(QUERY.lower().split("gpt ", 1)[1]))
+        responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
+        t = threading.Thread(target=Read, args=[responce])
+        t.start()
+        return responce
     elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
-        Read("Playing " + QUERY.lower().split("play ", 1)[1])
         Play(QUERY.lower().split("play ", 1)[1])
+        return Read("Playing " + QUERY.lower().split("play ", 1)[1])
     elif "bring it".lower() in QUERY.lower():
         Play("Mother Mother - Hayloft")
         return Read("Sir, There You Go.")
