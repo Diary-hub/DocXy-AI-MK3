@@ -20,7 +20,7 @@ from pydub import AudioSegment
 import time
 import threading
 import datetime
-
+import socket
 
 def Read(text):
     # Initialize the Text-to-speech engine
@@ -252,7 +252,7 @@ def Exam():
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
     creds = Credentials.from_service_account_file(
-        "Assets\Jarivs_Keys.json",
+        "Assets/Jarivs_Keys.json",
         scopes=SCOPES,
     )
 
@@ -319,6 +319,28 @@ def Exam():
         print(err)
 
 
+def shutdownPC(command):
+    s = socket.socket()
+    host = socket.gethostname()
+    print(host)
+    port = 1234
+    s.bind((host,port))
+    print("")
+    print("Waiting For Any Connections . . . .")
+    print("")
+    s.listen()
+    conn,addr = s.accept()
+    print("")
+    print("--- ", addr, " --- Has Connected.")
+    conn.send(command.encode())
+    print("Command Sended")
+
+
+
+
+
+
+
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
     if "open".lower() in QUERY.lower():
         print(QUERY.lower().split("open ", 1)[1])
@@ -361,3 +383,6 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         t = threading.Thread(target=Read, args=[responce])
         t.start()
         return responce
+
+
+
