@@ -368,7 +368,7 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         return PrepareWord(TITLE, MEMBERS)
     elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
         return Exam()
-    elif "shutdown".lower() in QUERY.lower() or "shutdown".lower() in QUERY.lower():
+    elif "shutdown".lower() in QUERY.lower() or "shut down".lower() in QUERY.lower():
         return shutdownPC()
     elif "bye".lower() in QUERY.lower():
         Read(
