@@ -1,3 +1,4 @@
+from wakeonlan import send_magic_packet
 import os
 import subprocess
 import openai
@@ -21,6 +22,13 @@ import time
 import threading
 import datetime
 import socket
+
+
+devices = {
+    'pc': {'mac': '02:55:ca:39:23:70',
+           'ip': '192.168.1.86'
+           }
+}
 
 
 def Read(text):
@@ -345,6 +353,18 @@ def shutdownPC(command="shutdown"):
     return responce
 
 
+def wake_up(name):
+    if name in devices:
+        mac, ip = devices[name].values()
+        send_magic_packet(mac)
+        responce = 'Magic Packet Sent To: ' + name
+        t = threading.Thread(target=Read, args=[responce])
+        t.start()
+        return responce
+    else:
+        return 'No Such Device Found Named: ' + name
+
+
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
     if "open".lower() in QUERY.lower():
         print(QUERY.lower().split("open ", 1)[1])
@@ -368,6 +388,8 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         return PrepareWord(TITLE, MEMBERS)
     elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
         return Exam()
+    elif "wake up".lower() in QUERY.lower() or "turn on".lower() in QUERY.lower():
+        return wake_up('pc')
     elif "shutdown".lower() in QUERY.lower() or "shut down".lower() in QUERY.lower():
         return shutdownPC()
     elif "bye".lower() in QUERY.lower():
@@ -389,3 +411,18 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         t = threading.Thread(target=Read, args=[responce])
         t.start()
         return responce
+
+
+def getDevicesAround():
+    return "null"
+
+
+def disconnectDevices(mode='sinlge', ip=''):
+    return 'done'
+
+
+def getDate():
+    return datetime.datetime.today().day
+
+
+print(getDate())
