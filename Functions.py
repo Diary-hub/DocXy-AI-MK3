@@ -22,6 +22,7 @@ import threading
 import datetime
 import socket
 
+
 def Read(text):
     # Initialize the Text-to-speech engine
     engine = pyttsx3.init()
@@ -149,7 +150,8 @@ def SearchForPath(app):
         mycursor = mydb.cursor()
 
         # execute a SELECT QUERY to retrieve data from a specific column
-        mycursor.execute("SELECT Path FROM programs where Name='" + app.lower() + "'")
+        mycursor.execute(
+            "SELECT Path FROM programs where Name='" + app.lower() + "'")
 
         # retrieve the results of the QUERY
         results = mycursor.fetchall()
@@ -184,7 +186,8 @@ def CreateWord(title, members):
             "give me only  150 words  and a Abstract about (" + title + ")"
         ),
         "introduction": ask_gpt(
-            "give me only  800 words  and a Introduction  about (" + title + ")"
+            "give me only  800 words  and a Introduction  about (" +
+            title + ")"
         ),
         "reference": ask_gpt(
             "give me only 5 refrences in a list about "
@@ -212,7 +215,8 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
     t = threading.Thread(target=CreateWord, args=[title, members])
     t.start()
     t2 = threading.Thread(
-        target=Read, args=["Sir I'am Working on Preparing a Document about " + title]
+        target=Read, args=[
+            "Sir I'am Working on Preparing a Document about " + title]
     )
     t2.start()
     return "Sir I'am Working on Preparing a Document about " + title
@@ -232,7 +236,8 @@ def Carter_AI(query):
             }
         ),
     )
-    t = threading.Thread(target=PlaySound, args=[response.json()["output"]["audio"]])
+    t = threading.Thread(target=PlaySound, args=[
+                         response.json()["output"]["audio"]])
     t.start()
     return response.json()["output"]["text"]
 
@@ -319,26 +324,25 @@ def Exam():
         print(err)
 
 
-def shutdownPC(command):
+def shutdownPC(command="shutdown"):
     s = socket.socket()
-    host = socket.gethostname()
+    host = '0.0.0.0'
     print(host)
     port = 1234
-    s.bind((host,port))
+    s.bind((host, port))
     print("")
     print("Waiting For Any Connections . . . .")
     print("")
     s.listen()
-    conn,addr = s.accept()
+    conn, addr = s.accept()
     print("")
     print("--- ", addr, " --- Has Connected.")
     conn.send(command.encode())
     print("Command Sended")
-
-
-
-
-
+    responce = 'Host with Address: ' + addr + " Is Turned Off"
+    t = threading.Thread(target=Read, args=[responce])
+    t.start()
+    return responce
 
 
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
@@ -364,6 +368,8 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         return PrepareWord(TITLE, MEMBERS)
     elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
         return Exam()
+    elif "shutdown".lower() in QUERY.lower() or "shutdown".lower() in QUERY.lower():
+        return shutdownPC()
     elif "bye".lower() in QUERY.lower():
         Read(
             random.choice(
@@ -383,6 +389,3 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         t = threading.Thread(target=Read, args=[responce])
         t.start()
         return responce
-
-
-
