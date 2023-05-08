@@ -1,43 +1,50 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    background-color: #0c1a1e;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    overflow: hidden;
+  background-color: #0c1a1e;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  overflow: hidden;
 }
 
 .warning-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .warning-box {
-    background-color: transparent;
-    border: 3px solid #FF0000;
-    border-radius: 10px;
-    color: #FFFFFF;
-    font-family: Arial, sans-serif;
-    font-size: 18px;
-    margin: 20px;
-    max-width: 600px;
-    padding: 20px;
-    text-align: center;
-    flex-basis: calc(33.33% - 40px);
-    /* adjust this value to fit your layout */
+  background-color: transparent;
+  border: 3px solid #ff0000;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  margin: 20px;
+  max-width: 600px;
+  padding: 20px;
+  text-align: center;
+  flex-basis: calc(33.33% - 40px);
+  /* adjust this value to fit your layout */
 }
 
 .warning-box h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 .warning-box p {
-    margin: 0;
+  margin: 0;
+}
+
+.active{
+    background-color: cyan;
+}
+.unactive{
+    background-color: darkviolet;
 }
