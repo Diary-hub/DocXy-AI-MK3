@@ -1,3 +1,4 @@
+import sys
 from wakeonlan import send_magic_packet
 import os
 import subprocess
@@ -22,13 +23,39 @@ import time
 import threading
 import datetime
 import socket
+from gtts import gTTS
+
+import base64
+import scipy.io.wavfile as wav
+from io import BytesIO
+from queue import Queue
+from pygame import mixer
+from yaspin import yaspin
+from termcolor import colored
+from pydub import AudioSegment
 
 
-devices = {
-    'pc': {'mac': '02:55:ca:39:23:70',
-           'ip': '192.168.1.86'
-           }
-}
+devices = {"pc": {"mac": "02:55:ca:39:23:70", "ip": "192.168.1.86"}}
+
+mixer.init()
+
+
+def play_audio(response, language="en", exit=False, response_name="response.mp3"):
+    speech = gTTS(text=response, lang=language, slow=False)
+
+    speech.save(response_name)
+
+    # play audio
+    mixer.music.load(response_name)
+    mixer.music.play()
+
+    # wait for audio to finish
+    duration = mixer.Sound(response_name).get_length()
+    time.sleep(duration + 1)
+
+    # unload and delete audio
+    mixer.music.unload()
+    os.remove(response_name)
 
 
 def Read(text):
@@ -158,8 +185,7 @@ def SearchForPath(app):
         mycursor = mydb.cursor()
 
         # execute a SELECT QUERY to retrieve data from a specific column
-        mycursor.execute(
-            "SELECT Path FROM programs where Name='" + app.lower() + "'")
+        mycursor.execute("SELECT Path FROM programs where Name='" + app.lower() + "'")
 
         # retrieve the results of the QUERY
         results = mycursor.fetchall()
@@ -194,8 +220,7 @@ def CreateWord(title, members):
             "give me only  150 words  and a Abstract about (" + title + ")"
         ),
         "introduction": ask_gpt(
-            "give me only  800 words  and a Introduction  about (" +
-            title + ")"
+            "give me only  800 words  and a Introduction  about (" + title + ")"
         ),
         "reference": ask_gpt(
             "give me only 5 refrences in a list about "
@@ -217,14 +242,14 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
         + "jarvis i have an assigmnet about "
         + title
     )
-    t = threading.Thread(target=Read, args=[responce])
+    t = threading.Thread(target=play_audio, args=[responce])
     t.start()
 
     t = threading.Thread(target=CreateWord, args=[title, members])
     t.start()
     t2 = threading.Thread(
-        target=Read, args=[
-            "Sir I'am Working on Preparing a Document about " + title]
+        target=play_audio,
+        args=["Sir I'am Working on Preparing a Document about " + title],
     )
     t2.start()
     return "Sir I'am Working on Preparing a Document about " + title
@@ -244,8 +269,7 @@ def Carter_AI(query):
             }
         ),
     )
-    t = threading.Thread(target=PlaySound, args=[
-                         response.json()["output"]["audio"]])
+    t = threading.Thread(target=PlaySound, args=[response.json()["output"]["audio"]])
     t.start()
     return response.json()["output"]["text"]
 
@@ -313,7 +337,7 @@ def Exam():
                         responce = (
                             "The Next Exam is: " + subject + "On " + day + " " + date
                         )
-                        t = threading.Thread(target=Read, args=[responce])
+                        t = threading.Thread(target=play_audio, args=[responce])
                         t.start()
 
                         return responce
@@ -334,7 +358,7 @@ def Exam():
 
 def shutdownPC(command="shutdown"):
     s = socket.socket()
-    host = '0.0.0.0'
+    host = "0.0.0.0"
     print(host)
     port = 1234
     s.bind((host, port))
@@ -347,8 +371,8 @@ def shutdownPC(command="shutdown"):
     print("--- ", addr, " --- Has Connected.")
     conn.send(command.encode())
     print("Command Sended")
-    responce = 'Host with Address: ' + addr + " Is Turned Off"
-    t = threading.Thread(target=Read, args=[responce])
+    responce = "Host with Address: " + addr + " Is Turned Off"
+    t = threading.Thread(target=play_audio, args=[responce])
     t.start()
     return responce
 
@@ -357,12 +381,12 @@ def wake_up(name):
     if name in devices:
         mac, ip = devices[name].values()
         send_magic_packet(mac)
-        responce = 'Magic Packet Sent To: ' + name
-        t = threading.Thread(target=Read, args=[responce])
+        responce = "Magic Packet Sent To: " + name
+        t = threading.Thread(target=play_audio, args=[responce])
         t.start()
         return responce
     else:
-        return 'No Such Device Found Named: ' + name
+        return "No Such Device Found Named: " + name
 
 
 def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
@@ -374,7 +398,7 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         SearchForPath(QUERY.lower().split("open ", 1)[1])
     elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
         responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
-        t = threading.Thread(target=Read, args=[responce])
+        t = threading.Thread(target=play_audio, args=[responce])
         t.start()
         return responce
     elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
@@ -388,10 +412,15 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         return PrepareWord(TITLE, MEMBERS)
     elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
         return Exam()
-    elif "wake up".lower() in QUERY.lower() or "turn on".lower() in QUERY.lower():
-        return wake_up('pc')
+    elif "turn on".lower() in QUERY.lower():
+        return wake_up("pc")
     elif "shutdown".lower() in QUERY.lower() or "shut down".lower() in QUERY.lower():
         return shutdownPC()
+    elif "wake up".lower() in QUERY.lower():
+        responce = "I Am Awake Sir"
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
     elif "bye".lower() in QUERY.lower():
         Read(
             random.choice(
@@ -408,7 +437,7 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
             "Your Jarivs from iron man, when i tell you anything, respond fast, just like jarivs: "
             + QUERY
         )
-        t = threading.Thread(target=Read, args=[responce])
+        t = threading.Thread(target=play_audio, args=[responce])
         t.start()
         return responce
 
@@ -417,12 +446,9 @@ def getDevicesAround():
     return "null"
 
 
-def disconnectDevices(mode='sinlge', ip=''):
-    return 'done'
+def disconnectDevices(mode="sinlge", ip=""):
+    return "done"
 
 
 def getDate():
     return datetime.datetime.today().day
-
-
-print(getDate())
