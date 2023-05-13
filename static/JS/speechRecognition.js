@@ -5,6 +5,7 @@ var recognition = new speechRecognition();
 var text = $("#text");
 var wake = $("#wake");
 var content = "";
+var prevContent = "";
 var boxes = $(".warning-container");
 var isWake = false;
 
@@ -87,11 +88,17 @@ recognition.onresult = function (event) {
       var current = event.resultIndex;
 
       var transcript = event.results[current][0].transcript;
-      content = transcript;
-      console.log(content);
+      if (transcript.length > 5) {
+        content = transcript;
+        // if (prevContent.length > 5) {
+        //   content += ' ,check if your previous answer was related or not, then answer:  ' + prevContent;
+        // }
+        console.log(content);
 
-      getResponce(content);
-      content = "";
+        getResponce(content);
+        content = "";
+      }
+
     };
   }
   //   getResponce(content);
@@ -126,6 +133,7 @@ function getResponce(query) {
     .then((r) => {
       let msg2 = { message: r.answer };
       this.messages.push(msg2);
+      prevContent = r.answer;
       createWidget(r.answer);
     })
     .catch((error) => {

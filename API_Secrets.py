@@ -6,3 +6,5 @@ DB_NAME = "jarvis"
 DB_SERVER = "localhost"
 DB_USERNAME = "admin"
 DB_PASSWORD = "admin1234admin"
+PORT = 5000
+HOST = "0.0.0.0"
