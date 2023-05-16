@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+import sys
 from Functions import *
 
 
@@ -24,7 +25,7 @@ def getResponse():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host=HOST, port=PORT, debug=False)
 
 # http://10.242.192.9:5000
 # http://127.0.0.1:5000
