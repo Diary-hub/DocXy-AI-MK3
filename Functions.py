@@ -58,6 +58,29 @@ def play_audio(response, language="en", exit=False, response_name="response.mp3"
     os.remove(response_name)
 
 
+def play_audio2(toSay):
+    url = "https://api.carterlabs.ai/speak"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "text": toSay,
+        "key": API_KEY_CARTER_AI,
+        "voice_id": "female",
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        data = response.json()
+        # print(data["file_url"])  # Print the file URL
+        PlaySound(URL=data["file_url"])
+
+        # Play audio from URL (you will need to implement this part)
+        # You can use libraries like pydub or playsound to play the audio
+
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
+
+
 def Read(text):
     # Initialize the Text-to-speech engine
     engine = pyttsx3.init()
