@@ -24,7 +24,6 @@ import threading
 import datetime
 import socket
 from gtts import gTTS
-
 import base64
 import scipy.io.wavfile as wav
 from io import BytesIO
@@ -485,9 +484,13 @@ import cv2
 import numpy as np
 import face_recognition
 import os
+import pickle
+import base64
+import io
+from PIL import Image
 
 
-def Recognize(imgPath):
+def TrainFacesDataSets():
     path = "Photo"
     imgs = []
     classNames = []
@@ -507,9 +510,33 @@ def Recognize(imgPath):
         return encodeList
 
     encodeListKnown = findEncodings(imgs)
-    print("Encoding Complete")
+    with open("dataset_faces.dat", "wb") as f:
+        pickle.dump(encodeListKnown, f)
 
-    img = cv2.imread(imgPath, 0)
+
+def Recognize(imgPath):
+    # Initialise your data
+    arr = imgPath
+    b = bytes(arr, "utf-8")
+    z = b[b.find(b"/9") :]
+    im = Image.open(io.BytesIO(base64.b64decode(z))).save("result.jpg")
+
+    path = "Photo"
+    imgs = []
+    classNames = []
+    mList = os.listdir(path)
+
+    for cl in mList:
+        curIMG = cv2.imread(f"{path}/{cl}")
+        imgs.append(curIMG)
+        classNames.append(os.path.splitext(cl)[0])
+
+    encodeListKnown = ""
+
+    with open("dataset_faces.dat", "rb") as f:
+        encodeListKnown = pickle.load(f)
+
+    img = cv2.imread("result.jpg", 0)
     imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
     imgS = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     facesCurFr = face_recognition.face_locations(imgS)
@@ -521,9 +548,6 @@ def Recognize(imgPath):
         matchIndex = np.argmin(faceDis)
         if mathes[matchIndex]:
             name = classNames[matchIndex].upper()
-            print(name)
+            return name
         else:
-            print("Nainasm")
-
-
-Recognize("Photo\diary.jpg")
+            return "Nainasm"

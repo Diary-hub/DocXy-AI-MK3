@@ -24,6 +24,14 @@ def getResponse():
     return jsonify(reply)
 
 
+@app.route("/WhoIsIt", methods=["GET", "POST"])
+def getfaces():
+    text = request.get_json()
+    response = Recognize(text["message"])
+    reply = {"answer": response}
+    return jsonify(reply)
+
+
 if __name__ == "__main__":
     app.run(host=HOST, port=PORT, debug=False)
 
