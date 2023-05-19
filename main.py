@@ -1,51 +1,53 @@
-import speech_recognition as sr
-from Functions import *
+import cv2
+import numpy as np
+import face_recognition
+import os
 
-# initialize the recognizer
-r = sr.Recognizer()
-isActive = False
+# Getting the Images
+path = "Photo"
+imgs = []
+classNames = []
+mList = os.listdir(path)
 
-while True:
-    # use the default microphone as the audio source
-    with sr.Microphone() as source:
-        print("Waiting For Activating...")
-        # adjust for ambient noise, if any
-        r.adjust_for_ambient_noise(source)
-        # listen for audio and store it in an AudioData object
-        audio = r.listen(source, 0, 5)
+for cl in mList:
+    curIMG = cv2.imread(f"{path}/{cl}")
+    imgs.append(curIMG)
+    classNames.append(os.path.splitext(cl)[0])
 
-    # recognize speech using Google Speech Recognition
-    try:
-        mySpeech = r.recognize_google(audio)
-        if "Jarvis Wake Up".lower() in mySpeech.lower() and not isActive:
-            isActive = True
-            CheckForCommand(mySpeech)
-            while isActive:
-                with sr.Microphone() as source:
-                    print("Listining...")
-                    # adjust for ambient noise, if any
-                    r.adjust_for_ambient_noise(source)
+# print(classNames)
 
-                    # listen for audio and store it in an AudioData object
-                    audio = r.listen(source, 0, 5)
-                try:
-                    mySpeech = r.recognize_google(audio)
-                    print("You said: " + mySpeech)
-                    if "jarvis deactivate" in mySpeech.lower():
-                        isActive = False
-                        Read("Deactivating Sir")
-                        break
-                    CheckForCommand(mySpeech)
-                except sr.UnknownValueError:
-                    print("Sorry Sir, I Could Not Understand")
-                    continue
-                except sr.RequestError:
-                    print("Sorry, my speech recognition service is down")
-                    continue
 
-    except sr.UnknownValueError:
-        print("No Wake Command Found")
-        continue
-    except sr.RequestError:
-        print("Sorry, my speech recognition service is down")
-        continue
+def findEncodings(images):
+    encodeList = []
+    for img in images:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        encode = face_recognition.face_encodings(img)[0]
+        encodeList.append(encode)
+    return encodeList
+
+
+encodeListKnown = findEncodings(imgs)
+print("Encoding Complete")
+
+cap = ""
+
+cap = cv2.imread("/path_to_image/opencv-logo.png", 0)
+
+
+success, img = cap.read()
+imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+imgS = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+facesCurFr = face_recognition.face_locations(imgS)
+encodecurFr = face_recognition.face_encodings(imgS, facesCurFr)
+for encodeFace, faceLok in zip(encodecurFr, facesCurFr):
+    mathes = face_recognition.compare_faces(encodeListKnown, encodeFace)
+    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+    # print(faceDis)
+    matchIndex = np.argmin(faceDis)
+    if mathes[matchIndex]:
+        name = classNames[matchIndex].upper()
+        print(name)
+    else:
+        print("Nainasm")
+cv2.imshow("Webcam", img)
+cv2.waitKey(1)
