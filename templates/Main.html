@@ -14,22 +14,25 @@
 
         <div class="warning-container">
 
-
             <div class="warning-box" id="wake">
                 <h2>Jarvis</h2>
                 <p></p>
             </div>
+            <video
+                src="PLAYERUNKNOWN'S BATTLEGROUNDS 2023.04.26 - 00.08.33.10.DVR.mp4"
+                autoplay="true" width="500" height="500">
+
+            </video>
+            <div id="my_camera"></div>
+            <button onclick="Snap()">Click Snap</button>
+            <div id="results"></div>
+            <p>The Name Is: Diary</p>
         </div>
-
-
-
-
-
-
-
 
     </body>
 
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
 
     <script
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
@@ -38,9 +41,56 @@
 </script>
 
     <script src="{{ url_for('static',
-        filename='JS/app.js')}}">
+        filename='JS/functionss.js')}}">
 </script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+
+    <script>
+    Webcam.set({
+        width: 500,
+        height: 500,
+        image_format: 'jpeg',
+        jpeg_quality: 90
+    });
+    Webcam.attach('#my_camera');
 
 
+    let a = async() => {
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+        await delay(2000)
+
+
+    }
+
+
+    function every(x) {
+        console.log('slaw')
+        let last = new Date().getTime();
+
+        (function loop() {
+            const now = new Date().getTime(),
+                delta = now - last;
+
+
+            if (delta >= x) {
+                Webcam.snap(function(data_uri) {
+                    // display results in page
+                    document.getElementById('results').innerHTML =
+                        '<img src="' + data_uri + '"/>';
+                });
+                last = now;
+            }
+
+            window.requestAnimationFrame(loop);
+        })();
+
+
+    }
+
+    $(document).ready(function() {
+        every(2000)
+    });
+</script>
 
 </html>

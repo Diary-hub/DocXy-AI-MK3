@@ -42,9 +42,10 @@ body {
   margin: 0;
 }
 
-.active{
-    background-color: cyan;
+.active {
+  background-color: cyan;
 }
-.unactive{
-    background-color: darkviolet;
+
+.unactive {
+  background-color: darkviolet;
 }

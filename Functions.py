@@ -40,7 +40,7 @@ devices = {"pc": {"mac": "02:55:ca:39:23:70", "ip": "192.168.1.86"}}
 mixer.init()
 
 
-def play_audio(response, language="en", exit=False, response_name="response.mp3"):
+def play_audio2(response, language="en", exit=False, response_name="response.mp3"):
     speech = gTTS(text=response, lang=language, slow=False)
 
     speech.save(response_name)
@@ -58,7 +58,7 @@ def play_audio(response, language="en", exit=False, response_name="response.mp3"
     os.remove(response_name)
 
 
-def play_audio2(toSay):
+def play_audio(toSay):
     url = "https://api.carterlabs.ai/speak"
     headers = {"Content-Type": "application/json"}
     data = {
@@ -73,9 +73,6 @@ def play_audio2(toSay):
         data = response.json()
         # print(data["file_url"])  # Print the file URL
         PlaySound(URL=data["file_url"])
-
-        # Play audio from URL (you will need to implement this part)
-        # You can use libraries like pydub or playsound to play the audio
 
     except requests.exceptions.RequestException as e:
         print("Error:", e)
@@ -426,10 +423,16 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         return responce
     elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
         Play(QUERY.lower().split("play ", 1)[1])
-        return Read("Playing " + QUERY.lower().split("play ", 1)[1])
+        responce = "Playing " + QUERY.lower().split("play ", 1)[1]
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
     elif "bring it".lower() in QUERY.lower():
         Play("Mother Mother - Hayloft")
-        return Read("Sir, There You Go.")
+        responce = "Sir, There You Go."
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
     elif "i have an assignment".lower() in QUERY.lower():
         TITLE = QUERY.lower().split("about ", 1)[1]
         return PrepareWord(TITLE, MEMBERS)
@@ -443,6 +446,7 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         responce = "I Am Awake Sir"
         t = threading.Thread(target=play_audio, args=[responce])
         t.start()
+
         return responce
     elif "bye".lower() in QUERY.lower():
         Read(

@@ -1,32 +1,31 @@
-this.messages = [];
+// Put variables in global scope to make them available to the browser console.
+const video = document.querySelector("video");
+const constraints = {
+    audio: false,
+    video: true,
+};
 
-function getResponce(query) {
-    let msg = { message: query }
-    this.messages.push(msg)
-
-    fetch('http://127.0.0.1:5000/getResponse', {
-        method: 'POST',
-        body: JSON.stringify({ message: query }),
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+        const videoTracks = stream.getVideoTracks();
+        console.log("Got stream with constraints:", constraints);
+        console.log(`Using video device: ${videoTracks[0].label}`);
+        stream.onremovetrack = () => {
+            console.log("Stream ended");
+        };
+        video.srcObject = stream;
     })
-        .then(r => r.json())
-        .then(r => {
-            let msg2 = { message: r.answer };
-            this.messages.push(msg2);
-            createWidget(r.answer)
-        }).catch((error) => {
-            console.error('Error:', error);
-        })
-
-}
-
-function createWidget(response) {
-    var html = '';
-
-    html += '<div class="warning-box"><h2>Jarvis</h2><p>' + response + '</p></div>'
-    boxes.innerHTML = html;
-
-}
+    .catch((error) => {
+        if (error.name === "ConstraintNotSatisfiedError") {
+            console.error(
+                `The resolution ${constraints.video.width.exact}x${constraints.video.height.exact} px is not supported by your device.`
+            );
+        } else if (error.name === "PermissionDeniedError") {
+            console.error(
+                "You need to grant this page permission to access your camera and microphone."
+            );
+        } else {
+            console.error(`getUserMedia error: ${error.name}`, error);
+        }
+    });
