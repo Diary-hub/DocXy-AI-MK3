@@ -28,26 +28,3 @@ def findEncodings(images):
 
 encodeListKnown = findEncodings(imgs)
 print("Encoding Complete")
-
-cap = ""
-
-cap = cv2.imread("/path_to_image/opencv-logo.png", 0)
-
-
-success, img = cap.read()
-imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
-imgS = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-facesCurFr = face_recognition.face_locations(imgS)
-encodecurFr = face_recognition.face_encodings(imgS, facesCurFr)
-for encodeFace, faceLok in zip(encodecurFr, facesCurFr):
-    mathes = face_recognition.compare_faces(encodeListKnown, encodeFace)
-    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-    # print(faceDis)
-    matchIndex = np.argmin(faceDis)
-    if mathes[matchIndex]:
-        name = classNames[matchIndex].upper()
-        print(name)
-    else:
-        print("Nainasm")
-cv2.imshow("Webcam", img)
-cv2.waitKey(1)

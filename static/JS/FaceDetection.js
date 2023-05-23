@@ -19,15 +19,18 @@ var photo = null;
 faceName = null;
 // var startbutton = null;
 
-function setName(aa) {
-    if (aa == null) {
+function setName(name) {
+    if (name == null) {
         faceName.innerHTML = "No Faces Detected";
+        isDiary = false;
 
-    } else if (aa != null & aa.toLowerCase() != "nainasm") {
-        faceName.innerHTML = "Your Name Is: " + aa;
+    } else if (name != null & name.toLowerCase() != "nainasm") {
+        faceName.innerHTML = "Your Name Is: " + name;
+        isDiary = true;
 
     } else {
         faceName.innerHTML = "Sorry, I Don't Know You";
+        isDiary = false;
 
     }
 
@@ -41,18 +44,18 @@ function startup() {
     // startbutton = document.getElementById('startbutton');
 
     navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false
-    })
-        .then(function (stream) {
+            video: true,
+            audio: false
+        })
+        .then(function(stream) {
             video.srcObject = stream;
             video.play();
         })
-        .catch(function (err) {
+        .catch(function(err) {
             console.log("An error occurred: " + err);
         });
 
-    video.addEventListener('canplay', function (ev) {
+    video.addEventListener('canplay', function(ev) {
         if (!streaming) {
             height = video.videoHeight / (video.videoWidth / width);
 
@@ -126,15 +129,15 @@ function takepicture() {
         this.messages.push(msg);
 
         fetch("http://127.0.0.1:5000/WhoIsIt", {
-            method: "POST",
-            body: JSON.stringify({
-                message: data
-            }),
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
+                method: "POST",
+                body: JSON.stringify({
+                    message: data
+                }),
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
             .then((r) => r.json())
             .then((r) => {
                 let msg2 = {

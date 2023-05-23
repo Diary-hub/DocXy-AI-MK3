@@ -32,6 +32,14 @@ from pygame import mixer
 from yaspin import yaspin
 from termcolor import colored
 from pydub import AudioSegment
+import cv2
+import numpy as np
+import face_recognition
+import os
+import pickle
+import base64
+import io
+from PIL import Image
 
 
 devices = {"pc": {"mac": "02:55:ca:39:23:70", "ip": "192.168.1.86"}}
@@ -39,7 +47,7 @@ devices = {"pc": {"mac": "02:55:ca:39:23:70", "ip": "192.168.1.86"}}
 mixer.init()
 
 
-def play_audio2(response, language="en", exit=False, response_name="response.mp3"):
+def play_audio(response, language="en", exit=False, response_name="response.mp3"):
     speech = gTTS(text=response, lang=language, slow=False)
 
     speech.save(response_name)
@@ -57,13 +65,13 @@ def play_audio2(response, language="en", exit=False, response_name="response.mp3
     os.remove(response_name)
 
 
-def play_audio(toSay):
+def play_audio2(toSay):
     url = "https://api.carterlabs.ai/speak"
     headers = {"Content-Type": "application/json"}
     data = {
         "text": toSay,
         "key": API_KEY_CARTER_AI,
-        "voice_id": "female",
+        "voice_id": "male",
     }
 
     try:
@@ -250,7 +258,7 @@ def CreateWord(title, members):
     file.render(context)
     file.save("Assets\Generated Files\\" + title + ".docx")
 
-    Read("Sir, The Document is Ready I Will Open it!")
+    play_audio("Sir, The Document is Ready I Will Open it!")
     OpenApp(title, "Assets\Generated Files\\" + title + ".docx")
 
 
@@ -261,16 +269,18 @@ def PrepareWord(title, members=["Diary Tariq Ibrahem"]):
         + "jarvis i have an assigmnet about "
         + title
     )
-    t = threading.Thread(target=play_audio, args=[responce])
-    t.start()
+    t1 = threading.Thread(target=play_audio, args=[responce])
+    t1.start()
+    t1.join()
 
-    t = threading.Thread(target=CreateWord, args=[title, members])
-    t.start()
-    t2 = threading.Thread(
+    t2 = threading.Thread(target=CreateWord, args=[title, members])
+    t2.start()
+    t3 = threading.Thread(
         target=play_audio,
         args=["Sir I'am Working on Preparing a Document about " + title],
     )
-    t2.start()
+    t3.start()
+    t3.join()
     return "Sir I'am Working on Preparing a Document about " + title
 
 
@@ -329,7 +339,10 @@ def Exam():
 
         if not values:
             print("No data found.")
-            return
+            responce = "Sir You Don't Have Any Exams"
+            t = threading.Thread(target=play_audio, args=[responce])
+            t.start()
+            return responce
 
         isNextExam = True
         i = 2
@@ -408,66 +421,6 @@ def wake_up(name):
         return "No Such Device Found Named: " + name
 
 
-def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
-    if "open".lower() in QUERY.lower():
-        print(QUERY.lower().split("open ", 1)[1])
-        SearchForPath(QUERY.lower().split("open ", 1)[1])
-    elif "lunch".lower() in QUERY.lower():
-        print(QUERY.lower().split("lunch ", 1)[1])
-        SearchForPath(QUERY.lower().split("open ", 1)[1])
-    elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
-        responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
-        t = threading.Thread(target=play_audio, args=[responce])
-        t.start()
-        return responce
-    elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
-        Play(QUERY.lower().split("play ", 1)[1])
-        responce = "Playing " + QUERY.lower().split("play ", 1)[1]
-        t = threading.Thread(target=play_audio, args=[responce])
-        t.start()
-        return responce
-    elif "bring it".lower() in QUERY.lower():
-        Play("Mother Mother - Hayloft")
-        responce = "Sir, There You Go."
-        t = threading.Thread(target=play_audio, args=[responce])
-        t.start()
-        return responce
-    elif "i have an assignment".lower() in QUERY.lower():
-        TITLE = QUERY.lower().split("about ", 1)[1]
-        return PrepareWord(TITLE, MEMBERS)
-    elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
-        return Exam()
-    elif "turn on".lower() in QUERY.lower():
-        return wake_up("pc")
-    elif "shutdown".lower() in QUERY.lower() or "shut down".lower() in QUERY.lower():
-        return shutdownPC()
-    elif "wake up".lower() in QUERY.lower():
-        responce = "I Am Awake Sir"
-        t = threading.Thread(target=play_audio, args=[responce])
-        t.start()
-
-        return responce
-    elif "bye".lower() in QUERY.lower():
-        Read(
-            random.choice(
-                [
-                    "Sir, Jarvis is Out of Service",
-                    "I'm Shutting Down",
-                    "It Seems I'm No Longer Required",
-                ]
-            )
-        )
-        exit()
-    else:
-        responce = ask_gpt(
-            "Your Jarivs from iron man, when i tell you anything, respond fast, just like jarivs: "
-            + QUERY
-        )
-        t = threading.Thread(target=play_audio, args=[responce])
-        t.start()
-        return responce
-
-
 def getDevicesAround():
     return "null"
 
@@ -478,16 +431,6 @@ def disconnectDevices(mode="sinlge", ip=""):
 
 def getDate():
     return datetime.datetime.today().day
-
-
-import cv2
-import numpy as np
-import face_recognition
-import os
-import pickle
-import base64
-import io
-from PIL import Image
 
 
 def TrainFacesDataSets():
@@ -551,3 +494,60 @@ def Recognize(imgPath):
             return name
         else:
             return "Nainasm"
+
+
+def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
+    if "open".lower() in QUERY.lower():
+        print(QUERY.lower().split("open ", 1)[1])
+        SearchForPath(QUERY.lower().split("open ", 1)[1])
+    elif "lunch".lower() in QUERY.lower():
+        print(QUERY.lower().split("lunch ", 1)[1])
+        SearchForPath(QUERY.lower().split("open ", 1)[1])
+    elif " GPT ".lower() in QUERY.lower() or "GPT ".lower() in QUERY.lower():
+        responce = ask_gpt(QUERY.lower().split("gpt ", 1)[1])
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
+    elif "jarvis play".lower() in QUERY.lower() or " play ".lower() in QUERY.lower():
+        Play(QUERY.lower().split("play ", 1)[1])
+        responce = "Playing " + QUERY.lower().split("play ", 1)[1]
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
+    elif "bring it".lower() in QUERY.lower():
+        Play("Mother Mother - Hayloft")
+        responce = "Sir, There You Go."
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
+    elif "i have an assignment".lower() in QUERY.lower():
+        TITLE = QUERY.lower().split("about ", 1)[1]
+        return PrepareWord(TITLE, MEMBERS)
+    elif "next exam".lower() in QUERY.lower() or "what exam".lower() in QUERY.lower():
+        return Exam()
+    elif "turn on".lower() in QUERY.lower():
+        return wake_up("pc")
+    elif "shutdown".lower() in QUERY.lower() or "shut down".lower() in QUERY.lower():
+        return shutdownPC()
+    elif "wake up".lower() in QUERY.lower():
+        responce = "I Am Awake Sir"
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+
+        return responce
+    elif "bye".lower() in QUERY.lower():
+        Read(
+            random.choice(
+                [
+                    "Sir, Jarvis is Out of Service",
+                    "I'm Shutting Down",
+                    "It Seems I'm No Longer Required",
+                ]
+            )
+        )
+        exit()
+    else:
+        responce = ask_gpt("respond fast, just like jarivs: " + QUERY)
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+        return responce
