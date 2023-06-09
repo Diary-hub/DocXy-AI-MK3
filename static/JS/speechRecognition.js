@@ -10,6 +10,14 @@ var boxes = $(".warning-container");
 var isWake = false;
 var ListenEnded = false;
 var isDiary;
+
+var Starters = ["Welcome! I'm Jarvis, your AI assistant. How can I help?",
+    "Hello! I'm Jarvis, here for you. Ask away!",
+    "Greetings! I'm Jarvis, at your service. What can I do for you?",
+    "Welcome aboard! I'm Jarvis, ready to assist you.",
+    "Hey there! I'm Jarvis, here to help. Let's get started!"
+]
+
 wake = document.querySelector("#wake");
 $(document).ready(function() {
     boxes = document.querySelector(".warning-container");
@@ -18,11 +26,11 @@ $(document).ready(function() {
 });
 
 recognition.continuous = true;
-
-recognition.onstart = function() {
+createWidget("Deactivated");
+recognition.onstart = async function() {
     text.text("Listening");
     console.log("Waiting for Activation");
-    wake.classList.add('active')
+    await createWidget("Deactivated");
 
 };
 
@@ -60,68 +68,69 @@ recognition.onresult = function(event) {
         var transcript = event.results[current][0].transcript;
         content = transcript;
         console.log(content);
-        gg = content.toLowerCase()
-        if (gg.includes('wake up')) {
-            console.log(getResponce("wake up"))
-            var recognition2 = new speechRecognition();
+        gg = content.toLowerCase();
 
-            recognition.continuous = false;
-            recognition2.continuous = true;
+        console.log(getResponce("say " + Starters[Math.floor(Math.random() * Starters.length)]));
+        var recognition2 = new speechRecognition();
 
-            isWake = true;
+        recognition.continuous = false;
+        recognition2.continuous = true;
+
+        isWake = true;
+        wake.classList.add('active')
+        recognition.stop()
+        recognition2.start()
+
+        recognition2.onstart = function() {
+            text.text("Listening");
+            console.log("listening...");
             wake.classList.add('active')
-            recognition.stop()
-            recognition2.start()
+        };
 
-            recognition2.onstart = function() {
-                text.text("Listening");
-                console.log("listening...");
-                wake.classList.add('active')
-            };
+        recognition2.onspeechend = function() {
+            text.text("No Activity to Listen to");
+            content = "";
+            recognition2.continuous = false;
+            recognition2.stop();
+        };
+        recognition2.onend = function() {
+            console.log("Starting Again to Listen");
+            createWidget("Deactivated");
+            recognition.continuous = true;
 
-            recognition2.onspeechend = function() {
-                text.text("No Activity to Listen to");
-                content = "";
-                recognition2.continuous = false;
-                recognition2.stop();
-            };
-            recognition2.onend = function() {
-                console.log("Starting Again to Listen");
-                recognition.continuous = true;
+            recognition.start();
+            isWake = false;
+            wake.classList.add('unactive')
+        };
+        recognition2.onerror = function() {
+            text.text("Error Try Again");
+            content = "";
+            console.log("Error");
+            recognition2.stop();
+        };
 
-                recognition.start();
-                isWake = false;
-                wake.classList.add('unactive')
-            };
-            recognition2.onerror = function() {
-                text.text("Error Try Again");
-                content = "";
-                console.log("Error");
-                recognition2.stop();
-            };
+        recognition2.onresult = function(event) {
+            if (!ListenEnded && isDiary) {
+                var current = event.resultIndex;
 
-            recognition2.onresult = function(event) {
-                if (!ListenEnded && isDiary) {
-                    var current = event.resultIndex;
+                var transcript = event.results[current][0].transcript;
+                if (transcript.length > 5) {
+                    ListenEnded = true;
+                    content = transcript;
+                    // if (prevContent.length > 5) {
+                    //   content += ' ,check if your previous answer was related or not, then answer:  ' + prevContent;
+                    // }
+                    console.log(content);
 
-                    var transcript = event.results[current][0].transcript;
-                    if (transcript.length > 5) {
-                        ListenEnded = true;
-                        content = transcript;
-                        // if (prevContent.length > 5) {
-                        //   content += ' ,check if your previous answer was related or not, then answer:  ' + prevContent;
-                        // }
-                        console.log(content);
-
-                        getResponce(content);
-                        content = "";
-                    }
-                } else if (!isDiary) {
-                    createWidget("Your Not Authorized..!");
+                    getResponce(content);
+                    content = "";
                 }
+            } else if (!isDiary) {
+                createWidget("Your Not Authorized..!");
+            }
 
-            };
-        }
+        };
+
         //   getResponce(content);
         content = "";
     } else {

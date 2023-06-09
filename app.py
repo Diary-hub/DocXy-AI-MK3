@@ -13,11 +13,22 @@ def index_get():
     return render_template("Main.html")
 
 
+previous_questions_and_answers = []
+
+
 @app.post("/getResponse")
 def getResponse():
     text = request.get_json()
     # response = ask_gpt(text["message"])
-    response = CheckForCommand(text["message"])
+    new_question = text["message"]
+    allResponse = CheckForCommand(
+        QUERY=new_question,
+        previous_questions_and_answers=previous_questions_and_answers,
+    )
+    response = allResponse
+
+    previous_questions_and_answers.append((new_question, response))
+    print(previous_questions_and_answers, response)
     # response = Exam()
     # response = Carter_AI(text["message"])
     reply = {"answer": response}

@@ -129,18 +129,64 @@ def Listen():
 openai.api_key = API_KEY_CHATGPT_AI  # Replace with your API key
 
 
-def ask_gpt(prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        temperature=0.5,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-    )
+def ask_gpt(prompt, previous_questions_and_answers):
+    # response = openai.Completion.create(
+    #     engine="text-davinci-003",
+    #     prompt=prompt,
+    #     temperature=0.5,
+    #     max_tokens=1024,
+    #     n=1,
+    #     stop=None,
+    # )
 
-    # print("ChatGPT: ", response.choices[0].text)
-    return response.choices[0].text
+    INSTRUCTIONS = "Your Jarivs from Iron man, respont short and quick"
+
+    TEMPERATURE = 0.5
+    MAX_TOKENS = 1024
+    FREQUENCY_PENALTY = 0
+    PRESENCE_PENALTY = 0.6
+    # limits how many questions we include in the prompt
+    MAX_CONTEXT_QUESTIONS = 10
+
+    def get_response(instructions, previous_questions_and_answers, new_question):
+        """Get a response from ChatCompletion
+
+            Args:
+            instructions: The instructions for the chat bot - this determines how it will behave
+            previous_questions_and_answers: Chat history
+            new_question: The new question to ask the bot
+
+        Returns:
+            The response text
+        """
+
+        # build the messages
+        messages = [
+            {"role": "system", "content": instructions},
+        ]
+
+        # add the previous questions and answers
+        for question, answer in previous_questions_and_answers[-MAX_CONTEXT_QUESTIONS:]:
+            messages.append({"role": "user", "content": question})
+            messages.append({"role": "assistant", "content": answer})
+        # add the new question
+        messages.append({"role": "user", "content": new_question})
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0301",
+            messages=messages,
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            top_p=1,
+            frequency_penalty=FREQUENCY_PENALTY,
+            presence_penalty=PRESENCE_PENALTY,
+        )
+
+        return completion.choices[0].message.content
+
+    new_question = prompt
+    response = get_response(INSTRUCTIONS, previous_questions_and_answers, new_question)
+    return response
 
 
 def talk_gpt(prompt):
@@ -496,7 +542,9 @@ def Recognize(imgPath):
             return "Nainasm"
 
 
-def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
+def CheckForCommand(
+    QUERY, MEMBERS=["Diary Tariq Ibrahem"], previous_questions_and_answers=[]
+):
     if "open".lower() in QUERY.lower():
         print(QUERY.lower().split("open ", 1)[1])
         SearchForPath(QUERY.lower().split("open ", 1)[1])
@@ -535,6 +583,12 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         t.start()
 
         return responce
+    elif "say".lower() in QUERY.lower():
+        responce = QUERY.lower().split("say ", 1)[1]
+        t = threading.Thread(target=play_audio, args=[responce])
+        t.start()
+
+        return responce
     elif "bye".lower() in QUERY.lower():
         Read(
             random.choice(
@@ -547,7 +601,10 @@ def CheckForCommand(QUERY, MEMBERS=["Diary Tariq Ibrahem"]):
         )
         exit()
     else:
-        responce = ask_gpt("respond fast, just like jarivs: " + QUERY)
+        responce = ask_gpt(
+            QUERY,
+            previous_questions_and_answers,
+        )
         t = threading.Thread(target=play_audio, args=[responce])
         t.start()
         return responce
